@@ -55,6 +55,8 @@ User Request (Web UI / API)
 
 **About Images:**
 1. **Image Accessibility**: Assume all image URLs are publicly accessible via HTTP/HTTPS (no authentication required)
+   - **Deployment Limitation**: Lenskart images inaccessible from cloud deployments (403 Forbidden due to CDN IP blocking)
+   - **Workaround**: Requires publicly accessible image URLs or localhost deployment for Lenskart URLs
 2. **Image Format**: Assume images are in standard formats (JPG, PNG, WebP) with maximum 10MB size
 3. **Image Content**: Assume images show eyewear products from standard product photography angles
 4. **Image Quality**: Assume images are clear enough for visual analysis (minimum 200x200 pixels)

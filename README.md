@@ -6,6 +6,17 @@
 
 > Note: Free tier may take 30-50 seconds to wake up on first visit.
 
+## ⚠️ Deployment Limitation
+
+**Note:** The live deployed version has limited functionality because Lenskart's servers block requests from cloud platforms (returns 403 Forbidden). This is a restriction on Lenskart's end, not an issue with the application.
+
+**Workarounds:**
+- For full functionality, run locally: `uvicorn src.server:app --reload`
+- The deployed version can analyze publicly accessible eyewear images
+- Demo mode works without restrictions
+
+**Why this happens:** Content delivery networks often block cloud server IPs to prevent scraping.
+
 AI-powered visual product measurement system that analyzes eyewear images and outputs structured, machine-readable measurements of observable visual properties.
 
 ## Features
