@@ -1,0 +1,111 @@
+{
+    "product_id": "LK-TEST03",
+    "processing_status": "success",
+    "visual_dimensions": {
+        "gender_expression": {
+            "score": 1.8,
+            "confidence": 0.85
+        },
+        "visual_weight": {
+            "score": -0.5,
+            "confidence": 0.82
+        },
+        "embellishment": {
+            "score": 0.2,
+            "confidence": 0.84
+        },
+        "unconventionality": {
+            "score": -1.2,
+            "confidence": 0.81
+        },
+        "formality": {
+            "score": 1.0,
+            "confidence": 0.83
+        }
+    },
+    "observable_attributes": {
+        "wirecore_visible": false,
+        "frame_geometry": "rectangular",
+        "transparency": "opaque",
+        "dominant_colors": [
+            {
+                "color": "brown",
+                "hex_approximation": "#8B4513",
+                "coverage_percentage": 80.0
+            }
+        ],
+        "surface_texture": "smooth",
+        "suitable_for_kids": false
+    },
+    "visual_metadata": {
+        "frame_material_apparent": "metal",
+        "lens_tint": "clear",
+        "has_nose_pads": true,
+        "temple_style": "straight"
+    },
+    "aggregate_confidence": 0.83,
+    "schema_version": "1.0",
+    "api_version": "1.0",
+    "error_type": null,
+    "images_capped": false,
+    "total_images_provided": 2,
+    "images_successfully_analyzed": 1,
+    "processing_time_ms": 2840,
+    "per_image_time_ms": [
+        2840
+    ],
+    "quality_flags": {
+        "low_confidence": false,
+        "high_variance": false,
+        "single_image_only": true,
+        "partial_analysis": true
+    },
+    "image_validation": {
+        "total_provided": 2,
+        "valid_count": 1,
+        "invalid_count": 1,
+        "invalid_urls": [
+            {
+                "url": "https://example.com/invalid-image-404.jpg",
+                "error_type": "not_found",
+                "error_message": "URL returned 404 Not Found"
+            }
+        ]
+    },
+    "per_image_analysis": [
+        {
+            "image_url": "https://static5.lenskart.com/media/catalog/product/.../valid-image.jpg",
+            "visual_dimensions": {
+                "gender_expression": {
+                    "score": 1.8,
+                    "confidence": 0.85
+                },
+                "visual_weight": {
+                    "score": -0.5,
+                    "confidence": 0.82
+                },
+                "embellishment": {
+                    "score": 0.2,
+                    "confidence": 0.84
+                },
+                "unconventionality": {
+                    "score": -1.2,
+                    "confidence": 0.81
+                },
+                "formality": {
+                    "score": 1.0,
+                    "confidence": 0.83
+                }
+            },
+            "processing_time_ms": 2840
+        }
+    ],
+    "variance_metrics": {
+        "gender_expression": 0.0,
+        "visual_weight": 0.0,
+        "embellishment": 0.0,
+        "unconventionality": 0.0,
+        "formality": 0.0
+    },
+    "aggregation_method": "confidence_weighted_average"
+}

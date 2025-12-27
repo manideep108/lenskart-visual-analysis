@@ -1,0 +1,164 @@
+{
+    "product_id": "LK-231031",
+    "processing_status": "success",
+    "visual_dimensions": {
+        "gender_expression": {
+            "score": 2.3,
+            "confidence": 0.89
+        },
+        "visual_weight": {
+            "score": -1.2,
+            "confidence": 0.85
+        },
+        "embellishment": {
+            "score": 0.5,
+            "confidence": 0.87
+        },
+        "unconventionality": {
+            "score": -0.8,
+            "confidence": 0.82
+        },
+        "formality": {
+            "score": 1.5,
+            "confidence": 0.88
+        }
+    },
+    "observable_attributes": {
+        "wirecore_visible": false,
+        "frame_geometry": "rectangular",
+        "transparency": "opaque",
+        "dominant_colors": [
+            {
+                "color": "golden brown",
+                "hex_approximation": "#B8860B",
+                "coverage_percentage": 75.0
+            },
+            {
+                "color": "black",
+                "hex_approximation": "#000000",
+                "coverage_percentage": 25.0
+            }
+        ],
+        "surface_texture": "smooth",
+        "suitable_for_kids": false
+    },
+    "visual_metadata": {
+        "frame_material_apparent": "metal",
+        "lens_tint": "clear",
+        "has_nose_pads": true,
+        "temple_style": "straight"
+    },
+    "aggregate_confidence": 0.862,
+    "schema_version": "1.0",
+    "api_version": "1.0",
+    "error_type": null,
+    "images_capped": false,
+    "total_images_provided": 3,
+    "images_successfully_analyzed": 3,
+    "processing_time_ms": 7245,
+    "per_image_time_ms": [
+        2340,
+        2450,
+        2455
+    ],
+    "quality_flags": {
+        "low_confidence": false,
+        "high_variance": false,
+        "single_image_only": false,
+        "partial_analysis": false
+    },
+    "image_validation": {
+        "total_provided": 3,
+        "valid_count": 3,
+        "invalid_count": 0,
+        "invalid_urls": []
+    },
+    "per_image_analysis": [
+        {
+            "image_url": "https://static5.lenskart.com/media/catalog/product/.../image1.jpg",
+            "visual_dimensions": {
+                "gender_expression": {
+                    "score": 2.5,
+                    "confidence": 0.9
+                },
+                "visual_weight": {
+                    "score": -1.0,
+                    "confidence": 0.85
+                },
+                "embellishment": {
+                    "score": 0.3,
+                    "confidence": 0.88
+                },
+                "unconventionality": {
+                    "score": -0.5,
+                    "confidence": 0.83
+                },
+                "formality": {
+                    "score": 1.8,
+                    "confidence": 0.87
+                }
+            },
+            "processing_time_ms": 2340
+        },
+        {
+            "image_url": "https://static5.lenskart.com/media/catalog/product/.../image2.jpg",
+            "visual_dimensions": {
+                "gender_expression": {
+                    "score": 2.3,
+                    "confidence": 0.88
+                },
+                "visual_weight": {
+                    "score": -1.5,
+                    "confidence": 0.86
+                },
+                "embellishment": {
+                    "score": 0.7,
+                    "confidence": 0.85
+                },
+                "unconventionality": {
+                    "score": -1.0,
+                    "confidence": 0.81
+                },
+                "formality": {
+                    "score": 1.4,
+                    "confidence": 0.89
+                }
+            },
+            "processing_time_ms": 2450
+        },
+        {
+            "image_url": "https://static5.lenskart.com/media/catalog/product/.../image3.jpg",
+            "visual_dimensions": {
+                "gender_expression": {
+                    "score": 2.1,
+                    "confidence": 0.89
+                },
+                "visual_weight": {
+                    "score": -1.1,
+                    "confidence": 0.84
+                },
+                "embellishment": {
+                    "score": 0.5,
+                    "confidence": 0.88
+                },
+                "unconventionality": {
+                    "score": -0.9,
+                    "confidence": 0.82
+                },
+                "formality": {
+                    "score": 1.3,
+                    "confidence": 0.88
+                }
+            },
+            "processing_time_ms": 2455
+        }
+    ],
+    "variance_metrics": {
+        "gender_expression": 0.17,
+        "visual_weight": 0.21,
+        "embellishment": 0.16,
+        "unconventionality": 0.21,
+        "formality": 0.21
+    },
+    "aggregation_method": "confidence_weighted_average"
+}

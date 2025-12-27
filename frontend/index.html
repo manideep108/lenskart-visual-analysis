@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Product Measurement System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar-container {
+            position: relative;
+            height: 8px;
+            background: linear-gradient(90deg, #ef4444 0%, #fbbf24 50%, #10b981 100%);
+            border-radius: 9999px;
+            overflow: visible;
+        }
+
+        .progress-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid #6366f1;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: left 0.3s ease;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen gradient-bg">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-white mb-4">
+                Visual Product Measurement System
+            </h1>
+            <p class="text-white/80 text-lg">AI-Powered Visual Analysis for Product Dimensions</p>
+        </div>
+
+        <!-- Batch Processing Section -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Batch Processing</h2>
+
+            <div class="space-y-6">
+                <!-- File Input -->
+                <div>
+                    <label for="batchFile" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Upload Excel Files (.xlsx) - Multiple files supported
+                    </label>
+                    <div class="flex gap-3">
+                        <input type="file" id="batchFile" accept=".xlsx" multiple
+                            class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none" />
+                        <button id="removeFilesBtn"
+                            class="hidden px-4 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-all">
+                            ❌ Remove
+                        </button>
+                    </div>
+                    <!-- Selected Files List -->
+                    <div id="selectedFilesList" class="hidden mt-3">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Selected Files:</p>
+                        <ul id="fileListItems" class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                            <!-- File names will be inserted here -->
+                        </ul>
+                    </div>
+                </div><!-- Process Button -->
+                <button id="processBatchBtn"
+                    class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <span id="batchBtnText">Process All Products</span>
+                    <span id="batchBtnLoading" class="hidden">
+                        <svg class="inline animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        Processing...
+                    </span>
+                </button>
+
+                <!-- Progress Indicator -->
+                <div id="batchProgress" class="hidden">
+                    <div class="bg-indigo-50 rounded-lg p-4">
+                        <!-- File Progress -->
+                        <div class="mb-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-semibold text-gray-700">File Progress</span>
+                                <span id="fileProgressText" class="text-sm font-bold text-purple-600">File 0 of 0</span>
+                            </div>
+                        </div>
+                        <!-- Product Progress -->
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700">Product Progress</span>
+                            <span id="progressText" class="text-sm font-bold text-indigo-600">0 of 0</span>
+                        </div>
+                        <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div id="progressBar"
+                                class="bg-gradient-to-r from-purple-500 to-pink-600 h-full transition-all duration-300"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batch Results Table -->
+                <div id="batchResults" class="hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Batch Results</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                                        Product ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Gender
+                                        Expr.</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Visual
+                                        Weight</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                                        Formality</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                                        Confidence</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchResultsBody">
+                                <!-- Results will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Export Buttons -->
+                    <div class="flex gap-4 mt-6">
+                        <button id="exportCsvBtn"
+                            class="flex-1 bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            ⬇️ Export to CSV
+                        </button>
+                        <button id="exportJsonBtn"
+                            class="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            ⬇️ Export to JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Single Product Section -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Single Product Analysis</h2>
+
+            <div class="space-y-6">
+                <!-- Product ID Input -->
+                <div>
+                    <label for="productId" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Product ID
+                    </label>
+                    <input type="text" id="productId" placeholder="e.g., 231031"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none" />
+                    <p id="productIdError" class="hidden text-sm text-red-600 mt-1">⚠️ Product ID is required</p>
+                </div><!-- Image URLs Input -->
+                <div>
+                    <label for="imageUrls" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Image URLs <span class="text-gray-400 font-normal">(one per line)</span>
+                    </label>
+                    <textarea id="imageUrls" rows="5"
+                        placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none resize-none"></textarea>
+                    <p id="imageUrlsError" class="hidden text-sm text-red-600 mt-1">⚠️ Invalid or missing image URLs</p>
+
+                    <!-- Image Preview Grid -->
+                    <div id="imagePreviewGrid" class="hidden mt-4">
+                        <p class="text-sm font-semibold text-gray-700 mb-3">Preview:</p>
+                        <div id="previewContainer" class="grid grid-cols-2 gap-3"></div>
+                    </div>
+                </div>
+
+                <!-- Analyze Button -->
+                <button id="analyzeBtn"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <span id="btnText">Analyze Product</span>
+                    <span id="btnLoading" class="hidden">
+                        <svg class="inline animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        Analyzing...
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Rate Limit Error Banner -->
+        <div id="rateLimitBanner" class="hidden max-w-4xl mx-auto mb-8">
+            <div class="bg-amber-50 border-2 border-amber-400 rounded-lg p-6 shadow-lg">
+                <div class="flex items-start gap-4">
+                    <div class="text-amber-500 text-4xl">⏰</div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-amber-900 mb-2">API Rate Limit Reached</h3>
+                        <p class="text-amber-800 mb-4">
+                            <span id="rateLimitMessage">The API quota has been exceeded.</span>
+                        </p>
+
+                        <!-- Countdown Timer -->
+                        <div id="retryCountdown" class="bg-amber-100 rounded-lg p-4 mb-4">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-amber-900">Retry available in:</span>
+                                <span id="countdownTimer" class="text-2xl font-mono font-bold text-amber-600">--</span>
+                            </div>
+                            <div class="w-full bg-amber-200 rounded-full h-2 mt-2">
+                                <div id="countdownBar"
+                                    class="bg-amber-500 h-2 rounded-full transition-all duration-1000"
+                                    style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestions -->
+                        <div class="mb-4">
+                            <p class="font-semibold text-amber-900 mb-2">Your Options:</p>
+                            <ul id="rateLimitSuggestions" class="space-y-2 text-sm text-amber-800">
+                                <!-- Populated by JavaScript -->
+                            </ul>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3 flex-wrap">
+                            <button onclick="retryAnalysis()" id="retryButton" disabled
+                                class="px-4 py-2 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                                🔄 Retry Now
+                            </button>
+                            <button onclick="loadDemoData()"
+                                class="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                                🎨 View Demo Results
+                            </button>
+                            <button onclick="dismissRateLimitBanner()"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section (Initially Hidden) -->
+        <div id="resultsSection" class="hidden">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8 slide-in">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Analysis Results</h2>
+
+                <!-- Radar Chart -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Visual Dimensions Overview</h3>
+                    <div class="flex justify-center">
+                        <div style="max-width: 380px; margin: 0 auto;">
+                            <canvas id="radarChart" width="340" height="340"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Dimensions -->
+                <div class="space-y-6 mb-8">
+                    <!-- Gender Expression -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700"
+                                title="Masculine (-5) to Feminine (+5)">Gender Expression</span>
+                            <span id="genderScore" class="text-sm font-bold text-indigo-600">0.0</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="genderIndicator" class="progress-indicator"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>-5.0 (Feminine)</span>
+                            <span>0.0</span>
+                            <span>+5.0 (Masculine)</span>
+                        </div>
+                    </div>
+
+                    <!-- Visual Weight -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700"
+                                title="Light/Sleek (-5) to Bold/Heavy (+5)">Visual Weight</span>
+                            <span id="weightScore" class="text-sm font-bold text-indigo-600">0.0</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="weightIndicator" class="progress-indicator"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>-5.0 (Light)</span>
+                            <span>0.0</span>
+                            <span>+5.0 (Heavy)</span>
+                        </div>
+                    </div>
+
+                    <!-- Embellishment -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700"
+                                title="Minimal (-5) to Ornate (+5)">Embellishment</span>
+                            <span id="embellishmentScore" class="text-sm font-bold text-indigo-600">0.0</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="embellishmentIndicator" class="progress-indicator"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>-5.0 (Minimal)</span>
+                            <span>0.0</span>
+                            <span>+5.0 (Ornate)</span>
+                        </div>
+                    </div>
+
+                    <!-- Unconventionality -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700"
+                                title="Classic (-5) to Avant-Garde (+5)">Unconventionality</span>
+                            <span id="unconventionalityScore" class="text-sm font-bold text-indigo-600">0.0</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="unconventionalityIndicator" class="progress-indicator"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>-5.0 (Classic)</span>
+                            <span>0.0</span>
+                            <span>+5.0 (Unique)</span>
+                        </div>
+                    </div>
+
+                    <!-- Formality -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700"
+                                title="Casual (-5) to Formal (+5)">Formality</span>
+                            <span id="formalityScore" class="text-sm font-bold text-indigo-600">0.0</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="formalityIndicator" class="progress-indicator"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>-5.0 (Casual)</span>
+                            <span>0.0</span>
+                            <span>+5.0 (Formal)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aggregate Confidence -->
+                <div class="bg-indigo-50 rounded-lg p-6 mb-6">
+                    <div class="flex items-center justify-between">
+                        <span
+                            class="text-lg font-semibold text-gray-800 cursor-help underline decoration-dotted underline-offset-4 decoration-gray-400"
+                            title="This score (0-100%) reflects the AI's certainty based on image clarity, lighting, and view angles.">Aggregate
+                            Confidence</span>
+                        <span id="confidenceValue" class="text-3xl font-bold text-indigo-600">0%</span>
+                    </div>
+                    <div class="mt-3 bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div id="confidenceBar"
+                            class="bg-gradient-to-r from-indigo-500 to-purple-600 h-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                    <!-- Processing Time -->
+                    <div id="processingTime" class="mt-3 text-sm text-gray-600 text-center hidden">
+                        ⏱️ Completed in <span id="timeElapsed" class="font-semibold">0.00</span> seconds
+                        <div id="processingTimeDisplay" class="text-sm text-gray-600 mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- URL Validation Results -->
+                <div id="urlValidationSection" class="hidden mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">📋 URL Validation</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-semibold">Total URLs:</span>
+                            <span id="urlTotal">0</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-semibold text-green-600">Valid:</span>
+                            <span id="urlValid" class="text-green-600">0</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-3">
+                            <span class="font-semibold text-red-600">Invalid:</span>
+                            <span id="urlInvalid" class="text-red-600">0</span>
+                        </div>
+                        <div id="invalidUrlsList" class="hidden">
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Invalid URLs:</p>
+                            <div id="invalidUrlsContent" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Variance Metrics -->
+                <div id="varianceSection" class="hidden mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">📊 Score Variance Across Images</h3>
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>Gender Expression:</span>
+                            <span id="varianceGender" class="font-mono">0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Visual Weight:</span>
+                            <span id="varianceWeight" class="font-mono">0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Embellishment:</span>
+                            <span id="varianceEmbellishment" class="font-mono">0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Unconventionality:</span>
+                            <span id="varianceUnconventionality" class="font-mono">0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Formality:</span>
+                            <span id="varianceFormality" class="font-mono">0.00</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-3 italic">Lower variance = more consistent across images</p>
+                    </div>
+                </div>
+
+                <!-- Per-Image Analysis -->
+                <div id="perImageSection" class="hidden mb-6">
+                    <details class="bg-gray-50 rounded-lg">
+                        <summary
+                            class="text-lg font-semibold text-gray-800 p-4 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors">
+                            📷 Per-Image Analysis (<span id="imageCount">0</span> images)
+                        </summary>
+                        <div id="perImageContent" class="p-4 pt-0 space-y-4"></div>
+                    </details>
+                </div>
+
+                <!-- Raw JSON Output (Collapsible) -->
+                <div>
+                    <details>
+                        <summary
+                            class="text-lg font-semibold text-gray-800 cursor-pointer hover:text-indigo-600 transition-colors">
+                            View Raw JSON</summary>
+                        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto mt-3">
+                            <pre id="rawJson" class="text-sm text-green-400 font-mono"></pre>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const resultsSection = document.getElementById('resultsSection');
+        const productIdInput = document.getElementById('productId');
+        const imageUrlsInput = document.getElementById('imageUrls');
+
+        let radarChartInstance = null;
+        let lastFormData = null;
+
+        // Store last rate limit response for demo mode
+        window.lastRateLimitResponse = null;
+
+        // Batch processing elements
+        const processBatchBtn = document.getElementById('processBatchBtn');
+        const batchBtnText = document.getElementById('batchBtnText');
+        const batchBtnLoading = document.getElementById('batchBtnLoading');
+        const batchFileInput = document.getElementById('batchFile');
+        const batchProgress = document.getElementById('batchProgress');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+        const fileProgressText = document.getElementById('fileProgressText');
+        const batchResults = document.getElementById('batchResults');
+        const batchResultsBody = document.getElementById('batchResultsBody');
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        const removeFilesBtn = document.getElementById('removeFilesBtn');
+        const selectedFilesList = document.getElementById('selectedFilesList');
+        const fileListItems = document.getElementById('fileListItems');
+
+        // Store batch results for export
+        let allBatchResults = [];
+
+        // Processing time tracking
+        let processingStartTime = 0;
+        const processingTimeDiv = document.getElementById('processingTime');
+        const timeElapsedSpan = document.getElementById('timeElapsed');
+
+        // Image preview elements
+        const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+        const previewContainer = document.getElementById('previewContainer');
+
+        // Validation error elements
+        const productIdError = document.getElementById('productIdError');
+        const imageUrlsError = document.getElementById('imageUrlsError');
+
+        // Helper: Get confidence color class
+        function getConfidenceColor(confidence) {
+            if (confidence >= 0.8) return { bar: 'bg-green-500', text: 'text-green-600' };
+            if (confidence >= 0.5) return { bar: 'bg-yellow-500', text: 'text-yellow-600' };
+            return { bar: 'bg-red-500', text: 'text-red-600' };
+        }
+
+        // Image Preview Grid
+        imageUrlsInput.addEventListener('input', function () {
+            const urls = this.value.trim().split('\n')
+                .map(url => url.trim())
+                .filter(url => url.length > 0);
+
+            if (urls.length === 0) {
+                imagePreviewGrid.classList.add('hidden');
+                previewContainer.innerHTML = '';
+                return;
+            }
+
+            imagePreviewGrid.classList.remove('hidden');
+            previewContainer.innerHTML = '';
+
+            urls.forEach(url => {
+                const imgWrapper = document.createElement('div');
+                imgWrapper.className = 'relative h-32 bg-white border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center';
+
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'w-full h-full object-contain p-2';
+                img.onerror = function () {
+                    imgWrapper.innerHTML = '<div class="flex items-center justify-center w-full h-full text-3xl text-gray-400">❌</div>';
+                };
+
+                imgWrapper.appendChild(img);
+                previewContainer.appendChild(imgWrapper);
+            });
+        });
+
+        // Input Validation
+        function validateInputs() {
+            let isValid = true;
+
+            // Reset styles
+            productIdInput.classList.remove('border-red-500');
+            imageUrlsInput.classList.remove('border-red-500');
+            productIdError.classList.add('hidden');
+            imageUrlsError.classList.add('hidden');
+
+            // Validate Product ID
+            const productId = productIdInput.value.trim();
+            if (!productId) {
+                productIdInput.classList.add('border-red-500');
+                productIdError.classList.remove('hidden');
+                isValid = false;
+            }
+
+            // Validate Image URLs
+            const imageUrlsText = imageUrlsInput.value.trim();
+            if (!imageUrlsText) {
+                imageUrlsInput.classList.add('border-red-500');
+                imageUrlsError.textContent = '\u26a0\ufe0f At least one image URL is required';
+                imageUrlsError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                const urls = imageUrlsText.split('\n')
+                    .map(url => url.trim())
+                    .filter(url => url.length > 0);
+
+                const invalidUrls = urls.filter(url =>
+                    !url.startsWith('http://') && !url.startsWith('https://')
+                );
+
+                if (invalidUrls.length > 0) {
+                    imageUrlsInput.classList.add('border-red-500');
+                    imageUrlsError.textContent = `\u26a0\ufe0f Invalid URL(s): must start with http:// or https://`;
+                    imageUrlsError.classList.remove('hidden');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        // Show selected files
+        batchFileInput.addEventListener('change', function () {
+            if (this.files.length > 0) {
+                removeFilesBtn.classList.remove('hidden');
+                selectedFilesList.classList.remove('hidden');
+                fileListItems.innerHTML = '';
+
+                Array.from(this.files).forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    fileListItems.appendChild(li);
+                });
+            } else {
+                removeFilesBtn.classList.add('hidden');
+                selectedFilesList.classList.add('hidden');
+            }
+        });
+
+        // Remove files button
+        removeFilesBtn.addEventListener('click', function () {
+            batchFileInput.value = '';
+            removeFilesBtn.classList.add('hidden');
+            selectedFilesList.classList.add('hidden');
+            fileListItems.innerHTML = '';
+            batchProgress.classList.add('hidden');
+            batchResults.classList.add('hidden');
+            batchResultsBody.innerHTML = '';
+            allBatchResults = [];
+            progressText.textContent = '0 of 0';
+            progressBar.style.width = '0%';
+            if (fileProgressText) fileProgressText.textContent = 'File 0 of 0';
+        });
+
+        // Map score (-5 to +5) to progress bar position (0% to 100%)
+        function mapScoreToPosition(score) {
+            return ((score + 5) / 10) * 100;
+        }
+
+        // Update progress indicator position
+        function updateProgress(indicatorId, score) {
+            const indicator = document.getElementById(indicatorId);
+            const position = mapScoreToPosition(score);
+            indicator.style.left = `${position}%`;
+        }
+
+        // Render radar chart
+        function renderRadarChart(data) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+
+            // Destroy previous chart instance if exists
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            // Extract dimension scores
+            const dimensions = data.visual_dimensions;
+            const chartData = {
+                labels: [
+                    'Gender Expression',
+                    'Visual Weight',
+                    'Embellishment',
+                    'Unconventionality',
+                    'Formality'
+                ],
+                datasets: [{
+                    label: 'Dimension Scores',
+                    data: [
+                        dimensions.gender_expression.score,
+                        dimensions.visual_weight.score,
+                        dimensions.embellishment.score,
+                        dimensions.unconventionality.score,
+                        dimensions.formality.score
+                    ],
+                    fill: true,
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(99, 102, 241, 1)',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            };
+
+            const config = {
+                type: 'radar',
+                data: chartData,
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: 10
+                    },
+                    scales: {
+                        r: {
+                            min: -5,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 11
+                                },
+                                backdropColor: 'transparent'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                color: '#1f2937'
+                            },
+                            grid: {
+                                color: '#e5e7eb'
+                            },
+                            angleLines: {
+                                color: '#d1d5db'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.label + ': ' + context.parsed.r.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            radarChartInstance = new Chart(ctx, config);
+        }
+
+        // Display URL Validation
+        function displayUrlValidation(validation) {
+            const section = document.getElementById('urlValidationSection');
+            section.classList.remove('hidden');
+
+            document.getElementById('urlTotal').textContent = validation.total_provided;
+            document.getElementById('urlValid').textContent = validation.valid_count;
+            document.getElementById('urlInvalid').textContent = validation.invalid_count;
+
+            if (validation.invalid_count > 0 && validation.invalid_urls) {
+                const invalidList = document.getElementById('invalidUrlsList');
+                const invalidContent = document.getElementById('invalidUrlsContent');
+                invalidList.classList.remove('hidden');
+                invalidContent.innerHTML = '';
+
+                validation.invalid_urls.forEach(inv => {
+                    const item = document.createElement('div');
+                    item.className = 'bg-red-50 border border-red-200 rounded p-2 text-xs';
+                    item.innerHTML = `
+                        <div class="font-semibold text-red-700">${inv.error_type}</div>
+                        <div class="text-gray-600 truncate" title="${inv.url}">${inv.url}</div>
+                        <div class="text-gray-500 italic">${inv.error_message}</div>
+                    `;
+                    invalidContent.appendChild(item);
+                });
+            }
+        }
+
+        // Display Variance Metrics
+        function displayVarianceMetrics(variance) {
+            const section = document.getElementById('varianceSection');
+            section.classList.remove('hidden');
+
+            document.getElementById('varianceGender').textContent = variance.gender_expression.toFixed(2);
+            document.getElementById('varianceWeight').textContent = variance.visual_weight.toFixed(2);
+            document.getElementById('varianceEmbellishment').textContent = variance.embellishment.toFixed(2);
+            document.getElementById('varianceUnconventionality').textContent = variance.unconventionality.toFixed(2);
+            document.getElementById('varianceFormality').textContent = variance.formality.toFixed(2);
+        }
+
+        // Display Per-Image Analysis
+        function displayPerImageAnalysis(images) {
+            const section = document.getElementById('perImageSection');
+            const content = document.getElementById('perImageContent');
+            const countSpan = document.getElementById('imageCount');
+
+            section.classList.remove('hidden');
+            countSpan.textContent = images.length;
+            content.innerHTML = '';
+
+            images.forEach((img, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 rounded-lg p-4';
+
+                const dims = img.visual_dimensions;
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <img src="${img.image_url}" alt="Image ${index + 1}" 
+                                 class="w-24 h-24 object-contain bg-gray-50 rounded border border-gray-200"
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3E❌%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        <div class="flex-1 space-y-1 text-sm">
+                            <div class="font-semibold text-gray-700 mb-2">Image ${index + 1}</div>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                                <div>
+                                    <span class="text-gray-600">Gender:</span>
+                                    <span class="font-mono font-semibold">${dims.gender_expression.score.toFixed(1)}</span>
+                                    <span class="text-xs text-gray-500">(${(dims.gender_expression.confidence * 100).toFixed(0)}%)</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Weight:</span>
+                                    <span class="font-mono font-semibold">${dims.visual_weight.score.toFixed(1)}</span>
+                                    <span class="text-xs text-gray-500">(${(dims.visual_weight.confidence * 100).toFixed(0)}%)</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Embellishment:</span>
+                                    <span class="font-mono font-semibold">${dims.embellishment.score.toFixed(1)}</span>
+                                    <span class="text-xs text-gray-500">(${(dims.embellishment.confidence * 100).toFixed(0)}%)</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Unconventional:</span>
+                                    <span class="font-mono font-semibold">${dims.unconventionality.score.toFixed(1)}</span>
+                                    <span class="text-xs text-gray-500">(${(dims.unconventionality.confidence * 100).toFixed(0)}%)</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Formality:</span>
+                                    <span class="font-mono font-semibold">${dims.formality.score.toFixed(1)}</span>
+                                    <span class="text-xs text-gray-500">(${(dims.formality.confidence * 100).toFixed(0)}%)</span>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    ⏱️ ${img.processing_time_ms}ms
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                content.appendChild(card);
+            });
+        }
+
+        // Display results
+        function displayResults(data) {
+            // Update dimension scores and indicators
+            document.getElementById('genderScore').textContent = data.visual_dimensions.gender_expression.score.toFixed(1);
+            updateProgress('genderIndicator', data.visual_dimensions.gender_expression.score);
+
+            document.getElementById('weightScore').textContent = data.visual_dimensions.visual_weight.score.toFixed(1);
+            updateProgress('weightIndicator', data.visual_dimensions.visual_weight.score);
+
+            document.getElementById('embellishmentScore').textContent = data.visual_dimensions.embellishment.score.toFixed(1);
+            updateProgress('embellishmentIndicator', data.visual_dimensions.embellishment.score);
+
+            document.getElementById('unconventionalityScore').textContent = data.visual_dimensions.unconventionality.score.toFixed(1);
+            updateProgress('unconventionalityIndicator', data.visual_dimensions.unconventionality.score);
+
+            document.getElementById('formalityScore').textContent = data.visual_dimensions.formality.score.toFixed(1);
+            updateProgress('formalityIndicator', data.visual_dimensions.formality.score);
+
+            // Update confidence with color coding
+            const confidencePercent = Math.round(data.aggregate_confidence * 100);
+            const confidenceColors = getConfidenceColor(data.aggregate_confidence);
+
+            document.getElementById('confidenceValue').textContent = `${confidencePercent}%`;
+            document.getElementById('confidenceValue').className = `text-3xl font-bold ${confidenceColors.text}`;
+
+            const confidenceBar = document.getElementById('confidenceBar');
+            confidenceBar.style.width = `${confidencePercent}%`;
+            confidenceBar.className = `${confidenceColors.bar} h-full transition-all duration-500`;
+
+            // Update raw JSON
+            document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+
+            // Render radar chart
+            renderRadarChart(data);
+
+            // Calculate and display processing time
+            const processingEndTime = performance.now();
+            const elapsedSeconds = ((processingEndTime - processingStartTime) / 1000).toFixed(2);
+            timeElapsedSpan.textContent = elapsedSeconds;
+            processingTimeDiv.classList.remove('hidden');
+
+            // Show results
+            resultsSection.classList.remove('hidden');
+
+            // Render radar chart
+            renderRadarChart(data);
+
+            // Display URL validation if present
+            if (data.image_validation) {
+                displayUrlValidation(data.image_validation);
+            }
+
+            // Display variance metrics if present
+            if (data.variance_metrics) {
+                displayVarianceMetrics(data.variance_metrics);
+            }
+
+            // Display per-image analysis if present
+            if (data.per_image_analysis && data.per_image_analysis.length > 0) {
+                displayPerImageAnalysis(data.per_image_analysis);
+            }
+
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Handle analyze button click
+        analyzeBtn.addEventListener('click', async () => {
+            // Validate inputs first
+            if (!validateInputs()) {
+                return; // Stop if validation fails
+            }
+
+            const productId = productIdInput.value.trim();
+            const imageUrlsText = imageUrlsInput.value.trim();
+
+            // Parse image URLs (one per line)
+            const imageUrls = imageUrlsText.split('\n')
+                .map(url => url.trim())
+                .filter(url => url.length > 0);
+
+            if (imageUrls.length === 0) {
+                alert('Please enter valid Image URLs');
+                return;
+            }
+
+            // Show loading state
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+            analyzeBtn.disabled = true;
+            resultsSection.classList.add('hidden');
+            processingTimeDiv.classList.add('hidden');
+
+            // Start timing
+            processingStartTime = performance.now();
+
+            // Save form data for retry
+            window.lastFormData = {
+                productId: productId,
+                imageUrls: imageUrls
+            };
+
+            try {
+                // Make API request
+                const response = await fetch('http://localhost:8000/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        image_urls: imageUrls
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to analyze product');
+                }
+
+
+                const data = await response.json();
+
+                // Check for rate limit error
+                if (data.error_type === 'rate_limited') {
+                    window.lastRateLimitResponse = data;  // Store for demo mode
+                    showRateLimitBanner(data);
+                    return;
+                }
+
+                displayResults(data);
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                console.error('Analysis failed:', error);
+            } finally {
+                // Reset button state
+                btnText.classList.remove('hidden');
+                btnLoading.classList.add('hidden');
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        // Export to CSV function
+        function exportToCSV() {
+            if (allBatchResults.length === 0) {
+                alert('No results to export');
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const filename = `visual_measurements_${today}.csv`;
+
+            // CSV Headers
+            const headers = [
+                'Product ID',
+                'Gender Expression',
+                'Visual Weight',
+                'Embellishment',
+                'Unconventionality',
+                'Formality',
+                'Confidence',
+                'Status'
+            ];
+
+            // CSV Rows
+            const rows = allBatchResults.map(result => [
+                result.product_id,
+                result.visual_dimensions.gender_expression.score.toFixed(2),
+                result.visual_dimensions.visual_weight.score.toFixed(2),
+                result.visual_dimensions.embellishment.score.toFixed(2),
+                result.visual_dimensions.unconventionality.score.toFixed(2),
+                result.visual_dimensions.formality.score.toFixed(2),
+                (result.aggregate_confidence * 100).toFixed(2) + '%',
+                result.processing_status
+            ]);
+
+            // Combine headers and rows
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+            ].join('\n');
+
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Export to JSON function
+        function exportToJSON() {
+            if (allBatchResults.length === 0) {
+                alert('No results to export');
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const filename = `visual_measurements_${today}.json`;
+
+            const jsonContent = JSON.stringify(allBatchResults, null, 2);
+
+            // Download
+            const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Export button event listeners
+        exportCsvBtn.addEventListener('click', exportToCSV);
+        exportJsonBtn.addEventListener('click', exportToJSON);
+
+        // Batch Processing Function
+        processBatchBtn.addEventListener('click', async () => {
+            const files = batchFileInput.files;
+
+            if (files.length === 0) {
+                alert('Please select at least one Excel file');
+                return;
+            }
+
+            // Show loading state
+            batchBtnText.classList.add('hidden');
+            batchBtnLoading.classList.remove('hidden');
+            processBatchBtn.disabled = true;
+            batchResults.classList.add('hidden');
+            batchResultsBody.innerHTML = '';
+            allBatchResults = [];
+
+            try {
+                batchProgress.classList.remove('hidden');
+                const totalFiles = files.length;
+                let allResults = [];
+
+                // Process each file sequentially
+                for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+                    const file = files[fileIndex];
+
+                    // Update file progress
+                    if (fileProgressText) {
+                        fileProgressText.textContent = `File ${fileIndex + 1} of ${totalFiles}: ${file.name}`;
+                    }
+
+                    // Read Excel file
+                    const data = await file.arrayBuffer();
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    if (jsonData.length === 0) {
+                        console.warn(`File ${file.name} is empty, skipping`);
+                        continue;
+                    }
+
+                    // Extract products
+                    const products = [];
+                    for (const row of jsonData) {
+                        const productId = row['Product Id'] || row['product_id'] || row['ProductId'];
+                        const imageUrls = [];
+
+                        // Look for image URL columns
+                        for (const key in row) {
+                            if (key.toLowerCase().includes('image') && row[key]) {
+                                imageUrls.push(row[key].trim());
+                            }
+                        }
+
+                        if (productId && imageUrls.length > 0) {
+                            products.push({
+                                product_id: String(productId),
+                                image_urls: imageUrls
+                            });
+                        }
+                    }
+
+                    if (products.length === 0) {
+                        console.warn(`No valid products found in ${file.name}, skipping`);
+                        continue;
+                    }
+
+                    // Process products sequentially for this file
+                    const totalProducts = products.length;
+                    let processed = 0;
+
+                    for (const product of products) {
+                        try {
+                            const response = await fetch('http://localhost:8000/analyze', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(product)
+                            });
+
+                            if (response.ok) {
+                                const result = await response.json();
+                                allResults.push(result);
+                            } else {
+                                // Failed result
+                                allResults.push({
+                                    product_id: product.product_id,
+                                    processing_status: 'failed',
+                                    visual_dimensions: {
+                                        gender_expression: { score: 0, confidence: 0 },
+                                        visual_weight: { score: 0, confidence: 0 },
+                                        embellishment: { score: 0, confidence: 0 },
+                                        unconventionality: { score: 0, confidence: 0 },
+                                        formality: { score: 0, confidence: 0 }
+                                    },
+                                    aggregate_confidence: 0
+                                });
+                            }
+                        } catch (error) {
+                            console.error(`Error processing ${product.product_id}:`, error);
+                            allResults.push({
+                                product_id: product.product_id,
+                                processing_status: 'failed',
+                                visual_dimensions: {
+                                    gender_expression: { score: 0, confidence: 0 },
+                                    visual_weight: { score: 0, confidence: 0 },
+                                    embellishment: { score: 0, confidence: 0 },
+                                    unconventionality: { score: 0, confidence: 0 },
+                                    formality: { score: 0, confidence: 0 }
+                                },
+                                aggregate_confidence: 0
+                            });
+                        }
+
+                        // Update product progress
+                        processed++;
+                        progressText.textContent = `${processed} of ${totalProducts} (in current file)`;
+                        progressBar.style.width = `${(processed / totalProducts) * 100}%`;
+                    }
+                }
+
+                // Display all results in table
+                allBatchResults = allResults; // Store for export
+                batchResults.classList.remove('hidden');
+
+                allResults.forEach(result => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-50';
+
+                    const statusClass = result.processing_status === 'success' ? 'text-green-600' : 'text-red-600';
+                    const statusText = result.processing_status === 'success' ? '\u2713 Success' : '\u2717 Failed';
+
+                    // Apply confidence color coding
+                    const confidenceColors = getConfidenceColor(result.aggregate_confidence);
+                    const confidenceValue = Math.round(result.aggregate_confidence * 100);
+
+                    row.innerHTML = `
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">${result.product_id}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">${result.visual_dimensions.gender_expression.score.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">${result.visual_dimensions.visual_weight.score.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">${result.visual_dimensions.formality.score.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-sm font-semibold ${confidenceColors.text}">${confidenceValue}%</td>
+                        <td class="px-4 py-3 text-sm font-semibold ${statusClass}">${statusText}</td>
+                    `;
+
+                    batchResultsBody.appendChild(row);
+                });
+
+                // Final progress update
+                progressText.textContent = `Complete! Processed ${allResults.length} total products`;
+                if (fileProgressText) {
+                    fileProgressText.textContent = `Completed all ${totalFiles} files`;
+                }
+
+                // Scroll to results
+                batchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (error) {
+                alert(`Error processing batch: ${error.message}`);
+                console.error('Batch processing failed:', error);
+            } finally {
+                // Reset button state
+                batchBtnText.classList.remove('hidden');
+                batchBtnLoading.classList.add('hidden');
+                processBatchBtn.disabled = false;
+            }
+        });
+    </script>
+
+    <!-- Rate Limit Error Handling (Embedded) -->
+    <script>
+        // Rate Limit Error Handling for Lenskart Visual Measurement System
+
+        // Global variables for countdown state
+        let countdownInterval = null;
+
+        /**
+         * Display the rate limit banner with countdown timer and suggestions
+         */
+        function showRateLimitBanner(data) {
+            const banner = document.getElementById('rateLimitBanner');
+            const message = document.getElementById('rateLimitMessage');
+            const suggestionsList = document.getElementById('rateLimitSuggestions');
+
+            banner.classList.remove('hidden');
+            message.textContent = data.error_message || 'API quota exceeded. Please wait before retrying.';
+
+            // Populate suggestions list
+            suggestionsList.innerHTML = '';
+            if (data.rate_limit_info && data.rate_limit_info.suggestions) {
+                data.rate_limit_info.suggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-start gap-2';
+                    li.innerHTML = `<span class="text-amber-600">•</span><span>${suggestion}</span>`;
+                    suggestionsList.appendChild(li);
+                });
+
+                // Add rate limit details
+                const detailsLi = document.createElement('li');
+                detailsLi.className = 'flex items-start gap-2 mt-2 pt-2 border-t border-amber-200';
+                detailsLi.innerHTML = `<span class="text-amber-600">ℹ️</span><span><strong>Limit:</strong> ${data.rate_limit_info.limit} | <strong>Reset:</strong> ${data.rate_limit_info.reset_time}</span>`;
+                suggestionsList.appendChild(detailsLi);
+            }
+
+            // Start countdown timer if retry delay is provided
+            if (data.retry_after_seconds) {
+                startCountdown(data.retry_after_seconds);
+            }
+
+            // Scroll banner into view
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        /**
+         * Start countdown timer with progress bar
+         */
+        function startCountdown(seconds) {
+            const timerDisplay = document.getElementById('countdownTimer');
+            const progressBar = document.getElementById('countdownBar');
+            const retryButton = document.getElementById('retryButton');
+
+            let remaining = seconds;
+            const total = seconds;
+
+            // Clear any existing countdown
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            // Disable retry button initially
+            retryButton.disabled = true;
+            retryButton.textContent = '🔄 Retry Now';
+
+            // Update display helper function
+            const updateDisplay = () => {
+                const minutes = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                timerDisplay.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+                progressBar.style.width = `${(remaining / total) * 100}%`;
+            };
+
+            // Update immediately
+            updateDisplay();
+
+            // Start interval
+            countdownInterval = setInterval(() => {
+                remaining--;
+
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    timerDisplay.textContent = 'Ready!';
+                    progressBar.style.width = '0%';
+                    retryButton.disabled = false;
+                    retryButton.textContent = '✅ Retry Now';
+                } else {
+                    updateDisplay();
+                }
+            }, 1000);
+        }
+
+        /**
+         * Dismiss the rate limit banner and clear countdown
+         */
+        function dismissRateLimitBanner() {
+            document.getElementById('rateLimitBanner').classList.add('hidden');
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
+        /**
+         * Load and display demo data using user's actual input (embedded)
+         */
+        async function loadDemoData() {
+            try {
+                // Get user's input from the form
+                const productIdInput = document.getElementById('productId');
+                const imageUrlsInput = document.getElementById('imageUrls');
+
+                if (!productIdInput || !imageUrlsInput) {
+                    throw new Error('Form inputs not found');
+                }
+
+                const productId = productIdInput.value.trim() || 'DEMO-PRODUCT';
+                const imageUrlsText = imageUrlsInput.value.trim();
+
+                // Parse image URLs (split by newlines and filter empty lines)
+                const imageUrls = imageUrlsText
+                    .split('\n')
+                    .map(url => url.trim())
+                    .filter(url => url.length > 0);
+
+                const imageCount = imageUrls.length || 1;
+
+                // Generate per_image_analysis for each URL with slightly different scores
+                const perImageAnalysis = imageUrls.map((url, index) => {
+                    const variation = (index * 0.2); // Variation for each image
+                    return {
+                        "image_url": url,
+                        "visual_dimensions": {
+                            "gender_expression": {
+                                "score": Math.max(-5, Math.min(5, 2.3 - variation)),
+                                "confidence": Math.min(0.89 + (variation * 0.01), 1.0)
+                            },
+                            "visual_weight": {
+                                "score": Math.max(-5, Math.min(5, -1.2 + variation * 0.5)),
+                                "confidence": Math.min(0.85 + (variation * 0.02), 1.0)
+                            },
+                            "embellishment": {
+                                "score": Math.max(-5, Math.min(5, 0.5 + variation * 0.3)),
+                                "confidence": Math.min(0.87 - (variation * 0.01), 1.0)
+                            },
+                            "unconventionality": {
+                                "score": Math.max(-5, Math.min(5, -0.8 - variation * 0.2)),
+                                "confidence": Math.min(0.82 + (variation * 0.015), 1.0)
+                            },
+                            "formality": {
+                                "score": Math.max(-5, Math.min(5, 1.5 - variation * 0.4)),
+                                "confidence": Math.min(0.88 + (variation * 0.01), 1.0)
+                            }
+                        },
+                        "processing_time_ms": 2340 + (index * 110)
+                    };
+                });
+
+                // If no URLs provided, generate one demo entry
+                if (perImageAnalysis.length === 0) {
+                    perImageAnalysis.push({
+                        "image_url": "demo_image_url",
+                        "visual_dimensions": {
+                            "gender_expression": { "score": 2.3, "confidence": 0.89 },
+                            "visual_weight": { "score": -1.2, "confidence": 0.85 },
+                            "embellishment": { "score": 0.5, "confidence": 0.87 },
+                            "unconventionality": { "score": -0.8, "confidence": 0.82 },
+                            "formality": { "score": 1.5, "confidence": 0.88 }
+                        },
+                        "processing_time_ms": 2340
+                    });
+                }
+
+                // Calculate average scores from per_image_analysis
+                const avgScores = {
+                    gender_expression: { score: 0, confidence: 0 },
+                    visual_weight: { score: 0, confidence: 0 },
+                    embellishment: { score: 0, confidence: 0 },
+                    unconventionality: { score: 0, confidence: 0 },
+                    formality: { score: 0, confidence: 0 }
+                };
+
+                perImageAnalysis.forEach(img => {
+                    Object.keys(avgScores).forEach(key => {
+                        avgScores[key].score += img.visual_dimensions[key].score;
+                        avgScores[key].confidence += img.visual_dimensions[key].confidence;
+                    });
+                });
+
+                Object.keys(avgScores).forEach(key => {
+                    avgScores[key].score /= perImageAnalysis.length;
+                    avgScores[key].confidence /= perImageAnalysis.length;
+                });
+
+                // Construct demo response with user's actual input
+                const data = {
+                    "product_id": productId,
+                    "processing_status": "success",
+                    "visual_dimensions": avgScores,
+                    "observable_attributes": {
+                        "wirecore_visible": false,
+                        "frame_geometry": "rectangular",
+                        "transparency": "opaque",
+                        "dominant_colors": [
+                            { "color": "golden brown", "hex_approximation": "#B8860B", "coverage_percentage": 75.0 },
+                            { "color": "black", "hex_approximation": "#000000", "coverage_percentage": 25.0 }
+                        ],
+                        "surface_texture": "smooth",
+                        "suitable_for_kids": false
+                    },
+                    "visual_metadata": {
+                        "frame_material_apparent": "metal",
+                        "lens_tint": "clear",
+                        "has_nose_pads": true,
+                        "temple_style": "straight"
+                    },
+                    "aggregate_confidence": 0.862,
+                    "schema_version": "1.0",
+                    "api_version": "1.0",
+                    "error_type": null,
+                    "images_capped": false,
+                    "total_images_provided": imageCount,
+                    "images_successfully_analyzed": imageCount,
+                    "processing_time_ms": perImageAnalysis.reduce((sum, img) => sum + img.processing_time_ms, 0),
+                    "per_image_time_ms": perImageAnalysis.map(img => img.processing_time_ms),
+                    "quality_flags": {
+                        "low_confidence": false,
+                        "high_variance": false,
+                        "single_image_only": imageCount === 1,
+                        "partial_analysis": false
+                    },
+                    "image_validation": {
+                        "total_provided": imageCount,
+                        "valid_count": imageCount,
+                        "invalid_count": 0,
+                        "invalid_urls": []
+                    },
+                    "per_image_analysis": perImageAnalysis,
+                    "variance_metrics": {
+                        "gender_expression": 0.17,
+                        "visual_weight": 0.21,
+                        "embellishment": 0.16,
+                        "unconventionality": 0.21,
+                        "formality": 0.21
+                    },
+                    "aggregation_method": "confidence_weighted_average",
+                    "notes": "⚠️ DEMO MODE: This is simulated data using your input. Scores are fake for demonstration purposes."
+                };
+
+                if (typeof displayResults === 'function') {
+                    displayResults(data);
+                    dismissRateLimitBanner();
+                } else {
+                    alert('Error: Display function not available');
+                }
+            } catch (error) {
+                console.error('Failed to generate demo data:', error);
+                alert('Could not generate demo data. Please check your form inputs.');
+            }
+        }
+
+        /**
+         * Retry the last analysis request
+         */
+        function retryAnalysis() {
+            if (lastFormData) {
+                dismissRateLimitBanner();
+                // Trigger form submission
+                const form = document.getElementById('analyzeForm');
+                if (form) {
+                    form.requestSubmit();
+                }
+            } else {
+                alert('No previous request to retry');
+            }
+        }
+    </script>
+</body>
+
+</html>

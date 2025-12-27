@@ -1,0 +1,21 @@
+# Core Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
+# AI/Vision
+google-generativeai>=0.3.1
+
+# HTTP Client
+httpx>=0.25.0
+
+# Data Validation
+pydantic>=2.5.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Excel Processing (for batch upload)
+openpyxl>=3.1.2
+
+# CORS
+starlette>=0.27.0

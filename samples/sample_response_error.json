@@ -1,0 +1,80 @@
+{
+    "product_id": "LK-ERROR",
+    "processing_status": "failed",
+    "visual_dimensions": {
+        "gender_expression": {
+            "score": 0.0,
+            "confidence": 0.0
+        },
+        "visual_weight": {
+            "score": 0.0,
+            "confidence": 0.0
+        },
+        "embellishment": {
+            "score": 0.0,
+            "confidence": 0.0
+        },
+        "unconventionality": {
+            "score": 0.0,
+            "confidence": 0.0
+        },
+        "formality": {
+            "score": 0.0,
+            "confidence": 0.0
+        }
+    },
+    "observable_attributes": {
+        "wirecore_visible": false,
+        "frame_geometry": "unknown",
+        "transparency": "opaque",
+        "dominant_colors": [],
+        "surface_texture": "smooth",
+        "suitable_for_kids": false
+    },
+    "visual_metadata": {
+        "frame_material_apparent": "indeterminate",
+        "lens_tint": "indeterminate",
+        "has_nose_pads": false,
+        "temple_style": "indeterminate"
+    },
+    "aggregate_confidence": 0.0,
+    "schema_version": "1.0",
+    "api_version": "1.0",
+    "error_type": "all_urls_invalid",
+    "images_capped": false,
+    "total_images_provided": 3,
+    "images_successfully_analyzed": 0,
+    "processing_time_ms": 450,
+    "per_image_time_ms": [],
+    "quality_flags": {
+        "low_confidence": true,
+        "high_variance": false,
+        "single_image_only": false,
+        "partial_analysis": true
+    },
+    "image_validation": {
+        "total_provided": 3,
+        "valid_count": 0,
+        "invalid_count": 3,
+        "invalid_urls": [
+            {
+                "url": "https://example.com/image1-404.jpg",
+                "error_type": "not_found",
+                "error_message": "URL returned 404 Not Found"
+            },
+            {
+                "url": "https://slow-server.com/timeout.jpg",
+                "error_type": "timeout",
+                "error_message": "Request timed out after 5 seconds"
+            },
+            {
+                "url": "https://example.com/document.pdf",
+                "error_type": "not_an_image",
+                "error_message": "Content-Type is 'application/pdf', not an image"
+            }
+        ]
+    },
+    "per_image_analysis": [],
+    "variance_metrics": null,
+    "aggregation_method": "confidence_weighted_average"
+}
