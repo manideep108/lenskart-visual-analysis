@@ -1,5 +1,11 @@
 # Lenskart Visual Measurement System
 
+## 🌐 Live Demo
+
+**Try it now:** [https://lenskart-visual-analysis.onrender.com](https://lenskart-visual-analysis.onrender.com)
+
+> Note: Free tier may take 30-50 seconds to wake up on first visit.
+
 AI-powered visual product measurement system that analyzes eyewear images and outputs structured, machine-readable measurements of observable visual properties.
 
 ## Features
