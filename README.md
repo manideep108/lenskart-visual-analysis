@@ -150,13 +150,6 @@ See complete examples in `samples/` folder:
 - `sample_response_success.json` - Successful 3-image analysis
 - `sample_response_partial.json` - Partial success (1 invalid URL)
 - `sample_response_error.json` - Rate limit error with retry suggestions
-  },
-  {
-    "product_id": "231032",
-    "image_urls": ["https://..."]
-  }
-]
-```
 
 ## 📁 Dataset
 
