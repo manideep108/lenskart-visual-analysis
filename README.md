@@ -158,6 +158,34 @@ See complete examples in `samples/` folder:
 ]
 ```
 
+## 📁 Dataset
+
+The project includes a comprehensive dataset of Lenskart eyewear products.
+
+**File:** `A1.0_data_product_images.xlsx`
+
+### Structure
+
+| Column | Description |
+|--------|-------------|
+| `product_id` | Unique Lenskart product identifier |
+| `image_url_1` | Front view image URL |
+| `image_url_2` | Side view image URL |
+| `image_url_3` | Alternate angle image URL |
+
+### How to Use
+
+1. Open `A1.0_data_product_images.xlsx`
+2. Copy a product_id and its image URLs
+3. Navigate to http://localhost:8000
+4. Paste into the form and click "Analyze Product"
+
+### Note
+
+- When running on cloud platforms (Render), Lenskart URLs may return 403 error
+- For full functionality, run locally: `uvicorn src.server:app --reload`
+- Use demo mode if URLs are inaccessible
+
 ## Response Schema
 
 ```json
