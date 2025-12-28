@@ -50,6 +50,10 @@ class LensTint(str, Enum):
     gradient = "gradient"
     mirrored = "mirrored"
     photochromic = "photochromic"
+    gray = "gray"
+    brown = "brown"
+    green = "green"
+    blue = "blue"
     indeterminate = "indeterminate"
 
 
