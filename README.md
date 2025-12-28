@@ -1,4 +1,13 @@
-# Lenskart Visual Measurement System
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com)
+[![Gemini](https://img.shields.io/badge/Google-Gemini%20AI-orange.svg)](https://ai.google.dev)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Deployed](https://img.shields.io/badge/Render-Live-brightgreen.svg)](https://lenskart-visual-analysis.onrender.com)
+
+<div align="center">
+  <h1>🔍 Lenskart Visual Measurement System</h1>
+  <p><strong>AI-powered visual product measurement system for eyewear analysis</strong></p>
+</div>
 
 ## 🌐 Live Demo
 
@@ -128,7 +137,12 @@ Content-Type: application/json
   {
     "product_id": "231031",
     "image_urls": ["https://..."]
-}
+  },
+  {
+    "product_id": "231032",
+    "image_urls": ["https://..."]
+  }
+]
 ```
 
 ## Sample Input/Output
@@ -347,6 +361,21 @@ lenskart/
 - **Frontend**: HTML, Tailwind CSS, Chart.js
 - **Data**: Pydantic for validation, openpyxl for Excel
 
-## License
+## 👤 Author
 
-MIT
+**Vemula Teja Manideep**
+
+- 🎓 MANIT Bhopal
+- 📧 vtejamanideep@gmail.com
+- 🐙 GitHub: [@manideep108](https://github.com/manideep108)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by Vemula Teja Manideep</p>
+  <p>⭐ Star this repo if you found it helpful!</p>
+</div>
