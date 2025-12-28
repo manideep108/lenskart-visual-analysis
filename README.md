@@ -162,42 +162,24 @@ See complete examples in `samples/` folder:
 
 The project includes a comprehensive dataset of Lenskart eyewear products for testing and analysis.
 
----
+**File:** `A1.0_data_product_images.xlsx`
 
-### 📄 File Information
+**Structure:**
+- `product_id` - Unique Lenskart product identifier (e.g., 231031, 231032)
+- `image_url_1` - Front view image URL
+- `image_url_2` - Side view image URL  
+- `image_url_3` - Alternate angle image URL
 
-| Property | Details |
-|----------|---------|
-| **Filename** | `A1.0_data_product_images.xlsx` |
-| **Format** | Microsoft Excel (.xlsx) |
-| **Purpose** | Contains Lenskart product IDs with multiple image URLs |
+**How to Use:**
 
----
+1. Open `A1.0_data_product_images.xlsx` in Excel
+2. Copy a product_id (e.g., 231031)
+3. Copy corresponding image URLs
+4. Navigate to http://localhost:8000
+5. Paste product_id and URLs into the form
+6. Click "Analyze Product"
 
-### 📊 Data Structure
-
-| Column | Description | Example |
-|--------|-------------|---------|
-| `product_id` | Unique Lenskart product identifier | `231031`, `231032` |
-| `image_url_1` | Front view image URL | `https://static5.lenskart.com/...` |
-| `image_url_2` | Side view image URL | `https://static5.lenskart.com/...` |
-| `image_url_3` | Alternate angle image URL | `https://static5.lenskart.com/...` |
-
----
-
-### 🚀 How to Use
-
-#### Option 1: Web Interface
-
-**Step 1** → Open `A1.0_data_product_images.xlsx` in Excel  
-**Step 2** → Copy a product_id (e.g., `231031`)  
-**Step 3** → Copy corresponding image URLs  
-**Step 4** → Navigate to http://localhost:8000  
-**Step 5** → Paste product_id and URLs into the form  
-**Step 6** → Click "Analyze Product"
-
-#### Option 2: Batch Processing API
-
+**For Batch Processing:**
 ```bash
 curl -X POST http://localhost:8000/analyze-batch \
   -H "Content-Type: application/json" \
@@ -206,16 +188,6 @@ curl -X POST http://localhost:8000/analyze-batch \
     {"product_id": "231032", "image_urls": ["url1", "url2", "url3"]}
   ]'
 ```
-
----
-
-### ⚠️ Important Notes
-
-| Scenario | Behavior | Solution |
-|----------|----------|----------|
-| Running on Cloud (Render) | Lenskart URLs return 403 error | Run locally instead |
-| Running Locally | All URLs work perfectly | Use `uvicorn src.server:app --reload` |
-| URLs Inaccessible | Cannot fetch images | Use Demo Mode |
 
 ## Response Schema
 
